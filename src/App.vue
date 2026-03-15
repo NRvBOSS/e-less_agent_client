@@ -1,41 +1,47 @@
-<script setup>
-import { ref, onMounted } from "vue"
-import axios from "axios"
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
+import Dashboard from './Dashboard.vue'
 
-const logs = ref([])
+interface Log {
+  id?: number | string
+  server: string
+  message: string
+  analysis: string
+  time: string
+}
+
+const logs = ref<Log[]>([])
+const loading = ref(true)
+const lastUpdated = ref<Date | null>(null)
+let pollTimer: ReturnType<typeof setInterval> | null = null
 
 async function loadLogs() {
-  const res = await axios.get("http://localhost:8080/analysis")
-  logs.value = res.data
+  try {
+    const res = await axios.get<Log[]>('http://localhost:8080/analysis')
+    logs.value = res.data.map((l, i) => ({ ...l, id: l.id ?? i }))
+    lastUpdated.value = new Date()
+  } catch (e) {
+    console.error('Failed to load logs', e)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(() => {
   loadLogs()
+  pollTimer = setInterval(loadLogs, 15_000)
+})
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
 })
 </script>
 
 <template>
-  <div style="padding:20px">
-    <h1>LogMind Dashboard</h1>
-
-    <table border="1" cellpadding="10">
-      <thead>
-        <tr>
-          <th>Server</th>
-          <th>Error</th>
-          <th>AI Solution</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr v-for="log in logs" :key="log.time">
-          <td>{{ log.server }}</td>
-          <td style="max-width:400px">{{ log.message }}</td>
-          <td style="max-width:400px">{{ log.analysis }}</td>
-          <td>{{ log.time }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <Dashboard
+    :logs="logs"
+    :loading="loading"
+    :last-updated="lastUpdated"
+    @refresh="loadLogs"
+  />
 </template>
