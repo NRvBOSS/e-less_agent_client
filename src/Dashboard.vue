@@ -98,7 +98,7 @@ const SEV_STYLE: Record<Severity, { badge: string; leftBar: string; pillActive: 
     <header class="shrink-0 flex items-center justify-between h-12 px-6 bg-[#13161e] border-b border-[#222636]">
       <div class="flex items-center gap-2">
         <span class="text-violet-500 text-xl leading-none">⬡</span>
-        <span class="text-[15px] font-semibold tracking-widest text-slate-100">LogMind</span>
+        <span class="text-[15px] font-semibold tracking-widest text-slate-100">E-Less</span>
         <span class="font-mono text-xs text-slate-500">/ dashboard</span>
       </div>
       <div class="flex items-center gap-3">
